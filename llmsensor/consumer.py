@@ -18,7 +18,7 @@ class Consumer(Thread):
     def run(self):
         while self.running:
             self.send_batch()
-            time.sleep(5)
+            time.sleep(3)
 
         self.send_batch()
 
@@ -33,16 +33,16 @@ class Consumer(Thread):
             try:
                 if (self.verbose):
                     print("llmsensor: sending events to ", self.api_url)
-
-                
+               
                 print("DEBUG: requests.post:")
                 print(batch)
-                response = requests.post(
-                    self.api_url + "/com.instana.plugin.python.%d",
-                    json={"events": batch},
-                    headers={"Content-Type": "application/json"},
-                    timeout=5
-                )
+                if (self.verbose):
+                    response = requests.post(
+                        self.api_url + "/com.instana.plugin.python.%d",
+                        json={"events": batch},
+                        headers={"Content-Type": "application/json"},
+                        timeout=5
+                    )
 
                 if (self.verbose):
                     print("llmsensor: events sent.", response.status_code)
@@ -57,5 +57,6 @@ class Consumer(Thread):
                 self.event_queue.append(batch)
 
     def stop(self):
+        print("DEBUG: to stop collection")
         self.running = False
         self.join()
