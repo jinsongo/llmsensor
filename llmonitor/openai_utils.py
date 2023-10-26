@@ -22,11 +22,11 @@ class OpenAIUtils:
     def parse_input(*args, **kwargs):
         messages = [OpenAIUtils.parse_message(message) for message in kwargs["messages"]]
         name = kwargs.get('model', None) or kwargs.get('engine', None) or kwargs.get('deployment_id', None)
-        extra = {key: kwargs[key] for key in MONITORED_KEYS if key in kwargs}
+#       extra = {key: kwargs[key] for key in MONITORED_KEYS if key in kwargs}
         return {
             "name": name,
-            "input": messages,
-            "extra": extra
+            "input": messages
+#           "extra": extra
         }
 
     @staticmethod
@@ -34,12 +34,13 @@ class OpenAIUtils:
         try:
             message = output.choices[0].message
 
+            print("DEBUG: return from parse_output")
             return {
                 "output": OpenAIUtils.parse_message(message),
-                "tokensUsage": {
+                "tokens": {
                     "completion": output.usage.completion_tokens,
                     "prompt": output.usage.prompt_tokens,
                 },
             }
         except Exception as e:
-            print("[LLMonitor] Error parsing output: ", e)
+            print("[llmsensor] DEBUG: parsing output: ", e)

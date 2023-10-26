@@ -16,4 +16,4 @@ def default_input_parser(*args, **kwargs):
 
 
 def default_output_parser(output):
-    return {"output": output, "tokensUsage": None}
+    return {"output": output, "tokens": None}

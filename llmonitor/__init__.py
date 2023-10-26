@@ -2,6 +2,7 @@ import asyncio, uuid, os, warnings
 import traceback
 from contextvars import ContextVar
 from datetime import datetime, timezone
+from collections import defaultdict
 
 from .parsers import (
     default_input_parser,
@@ -19,6 +20,12 @@ queue = EventQueue()
 consumer = Consumer(queue)
 
 consumer.start()
+
+def nested_dictionary():
+    return defaultdict(DictionaryOfStan)
+
+# Simple implementation of a nested dictionary.
+DictionaryOfStan = nested_dictionary
 
 
 def track_event(
@@ -38,16 +45,13 @@ def track_event(
     metadata=None,
 ):
     # Load here in case load_dotenv done after
-    APP_ID = os.environ.get("LLMONITOR_APP_ID")
-    VERBOSE = os.environ.get("LLMONITOR_VERBOSE")
-
-    if not APP_ID:
-        return warnings.warn("LLMONITOR_APP_ID is not set, not sending events")
+    AGENT_KEY = os.environ.get("AGENT_KEY")
+    VERBOSE = os.environ.get("LOG_VERBOSE")
 
     event = {
         "event": event_name,
         "type": event_type,
-        "app": APP_ID,
+        "app": AGENT_KEY,
         "name": name,
         "userId": user_id,
         "userProps": user_props,
@@ -58,20 +62,43 @@ def track_event(
         "input": input,
         "output": output,
         "error": error,
-        "extra": extra,
-        "runtime": "llmonitor-py",
-        "tokensUsage": token_usage,
+#       "extra": extra,
+        "runtime": "llmsensor",
+        "tokens": token_usage,
         "metadata": metadata,
     }
 
-    if VERBOSE:
-        print("llmonitor_add_event", event)
+    plugin_data = dict()
+    try:
+        plugin_data["name"] = "com.instana.plugin.openai"
+        plugin_data["entityId"] = "123456"
+        plugin_data["data"] = DictionaryOfStan()
+        plugin_data["data"]["event"] = event_name
+        plugin_data["data"]["type"] = event_type
+        plugin_data["data"]["app"] = AGENT_KEY
+        plugin_data["data"]["name"] = name
+        plugin_data["data"]["userId"] = user_id
+        plugin_data["data"]["userProps"] = user_props
+        plugin_data["data"]["tags"] = tags
+        plugin_data["data"]["runId"] = str(run_id)
+        plugin_data["data"]["timestamp"] = datetime.now(timezone.utc).isoformat()
+        plugin_data["data"]["input"] = input
+        plugin_data["data"]["output"] = output
+        plugin_data["data"]["error"] = error
+        plugin_data["data"]["runtime"] = "openai"
+        plugin_data["data"]["tokens"] = token_usage["completion"] if token_usage else 0
+        plugin_data["data"]["metadata"] = metadata
+    except Exception:
+        print("_collect_metrics: ", exc_info=True)
 
-    queue.append(event)
+    if VERBOSE:
+        print("llmsensor_add_event", event)
+
+    queue.append([plugin_data])
 
 
 def handle_internal_error(e):
-    print("[LLMonitor] Error: ", e)
+    print("[llmsensor] Error: ", e)
 
 
 def wrap(
@@ -91,6 +118,8 @@ def wrap(
             run_id = uuid.uuid4()
             token = run_ctx.set(run_id)
             parsed_input = input_parser(*args, **kwargs)
+            print("DEBUG: parsed_input:")
+            print(parsed_input)
 
             track_event(
                 type,
@@ -104,7 +133,7 @@ def wrap(
                 or user_props
                 or user_props_ctx.get(),
                 tags=kwargs.pop("tags", None) or tags or tags_ctx.get(),
-                extra=parsed_input["extra"],
+#               extra=parsed_input["extra"],
             )
         except Exception as e:
             handle_internal_error(e)
@@ -124,6 +153,8 @@ def wrap(
 
         try:
             parsed_output = output_parser(output)
+            print("DEBUG: parsed_output:")
+            print(parsed_output)
 
             track_event(
                 type,
@@ -132,7 +163,7 @@ def wrap(
                 # Need name in case need to compute tokens usage server side,
                 name=name or parsed_input["name"],
                 output=parsed_output["output"],
-                token_usage=parsed_output["tokensUsage"],
+                token_usage=parsed_output["tokens"],
             )
             return output
         except Exception as e:
@@ -149,6 +180,8 @@ def wrap(
             token = run_ctx.set(run_id)
             parsed_input = input_parser(*args, **kwargs)
             tags = kwargs.pop("tags", None)
+            print("DEBUG: parsed_input:")
+            print(parsed_input)
 
             track_event(
                 type,
@@ -162,7 +195,7 @@ def wrap(
                 or user_props
                 or kwargs.pop("user_props", None),
                 tags=tags,
-                extra=parsed_input["extra"],
+#               extra=parsed_input["extra"],
             )
         except Exception as e:
             handle_internal_error(e)
@@ -182,6 +215,8 @@ def wrap(
 
         try:
             parsed_output = output_parser(output)
+            print("DEBUG: parsed_output:")
+            print(parsed_output)
 
             track_event(
                 type,
@@ -190,7 +225,7 @@ def wrap(
                 # Need name in case need to compute tokens usage server side,
                 name=name or parsed_input["name"],
                 output=parsed_output["output"],
-                token_usage=parsed_output["tokensUsage"],
+                token_usage=parsed_output["tokens"],
             )
             return output
         except Exception as e:
