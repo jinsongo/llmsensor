@@ -38,16 +38,13 @@ def track_event(
     metadata=None,
 ):
     # Load here in case load_dotenv done after
-    APP_ID = os.environ.get("LLMONITOR_APP_ID")
-    VERBOSE = os.environ.get("LLMONITOR_VERBOSE")
-
-    if not APP_ID:
-        return warnings.warn("LLMONITOR_APP_ID is not set, not sending events")
+    AGENT_KEY = os.environ.get("AGENT_KEY")
+    VERBOSE = os.environ.get("LOG_VERBOSE")
 
     event = {
         "event": event_name,
         "type": event_type,
-        "app": APP_ID,
+        "app": AGENT_KEY,
         "name": name,
         "userId": user_id,
         "userProps": user_props,
@@ -58,20 +55,20 @@ def track_event(
         "input": input,
         "output": output,
         "error": error,
-        "extra": extra,
-        "runtime": "llmonitor-py",
+#       "extra": extra,
+        "runtime": "llmsensor",
         "tokensUsage": token_usage,
         "metadata": metadata,
     }
 
     if VERBOSE:
-        print("llmonitor_add_event", event)
+        print("llmsensor_add_event", event)
 
     queue.append(event)
 
 
 def handle_internal_error(e):
-    print("[LLMonitor] Error: ", e)
+    print("[llmsensor] Error: ", e)
 
 
 def wrap(
@@ -91,6 +88,8 @@ def wrap(
             run_id = uuid.uuid4()
             token = run_ctx.set(run_id)
             parsed_input = input_parser(*args, **kwargs)
+            print("DEBUG: parsed_input:")
+            print(parsed_input)
 
             track_event(
                 type,
@@ -104,7 +103,7 @@ def wrap(
                 or user_props
                 or user_props_ctx.get(),
                 tags=kwargs.pop("tags", None) or tags or tags_ctx.get(),
-                extra=parsed_input["extra"],
+#               extra=parsed_input["extra"],
             )
         except Exception as e:
             handle_internal_error(e)
@@ -124,6 +123,8 @@ def wrap(
 
         try:
             parsed_output = output_parser(output)
+            print("DEBUG: parsed_output:")
+            print(parsed_output)
 
             track_event(
                 type,
@@ -149,6 +150,8 @@ def wrap(
             token = run_ctx.set(run_id)
             parsed_input = input_parser(*args, **kwargs)
             tags = kwargs.pop("tags", None)
+            print("DEBUG: parsed_input:")
+            print(parsed_input)
 
             track_event(
                 type,
@@ -162,7 +165,7 @@ def wrap(
                 or user_props
                 or kwargs.pop("user_props", None),
                 tags=tags,
-                extra=parsed_input["extra"],
+#               extra=parsed_input["extra"],
             )
         except Exception as e:
             handle_internal_error(e)
@@ -182,6 +185,8 @@ def wrap(
 
         try:
             parsed_output = output_parser(output)
+            print("DEBUG: parsed_output:")
+            print(parsed_output)
 
             track_event(
                 type,

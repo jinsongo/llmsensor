@@ -1,4 +1,4 @@
-from llmonitor import monitor
+from llmsensor import monitor
 
 from dotenv import load_dotenv
 import openai
