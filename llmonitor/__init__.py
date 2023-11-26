@@ -79,17 +79,17 @@ def track_event(
         plugin_data["data"]["name"] = name
         plugin_data["data"]["userId"] = user_id
         plugin_data["data"]["userProps"] = user_props
-        plugin_data["data"]["tags"] = tags
+        plugin_data["data"]["tags"] = "None"
         plugin_data["data"]["runId"] = str(run_id)
         plugin_data["data"]["timestamp"] = datetime.now(timezone.utc).isoformat()
-        plugin_data["data"]["input"] = input
-        plugin_data["data"]["output"] = output
-        plugin_data["data"]["error"] = error
+        plugin_data["data"]["input"] = input[0]["text"] if input else "None"
+        plugin_data["data"]["output"] = output["text"] if output else "None"
+        plugin_data["data"]["error"] = "None"
         plugin_data["data"]["runtime"] = "openai"
         plugin_data["data"]["tokens"] = token_usage["completion"] if token_usage else 0
-        plugin_data["data"]["metadata"] = metadata
-    except Exception:
-        print("_collect_metrics: ", exc_info=True)
+        plugin_data["data"]["metadata"] = "None"
+    except Exception as e:
+        print("_collect_metrics:", e)
 
     if VERBOSE:
         print("llmsensor_add_event", event)
