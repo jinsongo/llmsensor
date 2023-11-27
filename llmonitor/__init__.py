@@ -71,7 +71,7 @@ def track_event(
     plugin_data = dict()
     try:
         plugin_data["name"] = "com.instana.plugin.openai"
-        plugin_data["entityId"] = "123456"
+        plugin_data["entityId"] = "Openai"
         plugin_data["data"] = DictionaryOfStan()
         plugin_data["data"]["event"] = event_name
         plugin_data["data"]["type"] = event_type
@@ -82,7 +82,7 @@ def track_event(
         plugin_data["data"]["tags"] = "None"
         plugin_data["data"]["runId"] = str(run_id)
         plugin_data["data"]["timestamp"] = datetime.now(timezone.utc).isoformat()
-        plugin_data["data"]["input"] = input[0]["text"] if input else "None"
+        plugin_data["data"]["input"] = input[0]["text"] if input and input != "None" else "None"
         plugin_data["data"]["output"] = output["text"] if output else "None"
         plugin_data["data"]["error"] = "None"
         plugin_data["data"]["runtime"] = "openai"
@@ -94,7 +94,7 @@ def track_event(
     if VERBOSE:
         print("llmsensor_add_event", event)
 
-    queue.append([plugin_data])
+    queue.append(plugin_data)
 
 
 def handle_internal_error(e):

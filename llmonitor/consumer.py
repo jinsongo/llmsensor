@@ -65,13 +65,12 @@ class Consumer(Thread):
 
                 # Report metrics
                 instana_data_url = "http://127.0.0.1:42699/com.instana.plugin.openai.123456"
-                metric_bundle = batch[0] 
                 response = requests.post(instana_data_url,
-                    data=to_json(metric_bundle),
+                    data=to_json(batch),
                     headers={"Content-Type": "application/json"},
                     timeout=0.8)
 
-                print("llmsensor: events data:", to_json(metric_bundle))
+                print("llmsensor: events data:", to_json(batch))
                 print("llmsensor: events sent.", response.status_code)
 
                 if response.status_code != 200:
