@@ -45,39 +45,39 @@ def track_event(
     metadata=None,
 ):
     # Load here in case load_dotenv done after
-    AGENT_KEY = os.environ.get("AGENT_KEY")
+    AGENT_KEY = "llm-openai-key"
     VERBOSE = os.environ.get("LOG_VERBOSE")
 
     event = {
-        "event": event_name,
-        "type": event_type,
+        "event": event_name if event_name else "None",
+        "type": event_type if event_type else "None",
         "app": AGENT_KEY,
-        "name": name,
-        "userId": user_id,
-        "userProps": user_props,
-        "tags": tags,
+        "name": name if name else "None",
+        "userId": user_id if user_id else "None",
+        "userProps": user_props if user_props else "None",
+        "tags": "None",
         "runId": str(run_id),
-        "parentRunId": str(parent_run_id) if parent_run_id else None,
+        "parentRunId": str(parent_run_id) if parent_run_id else "None",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "input": input,
-        "output": output,
-        "error": error,
+        "input": input if input else "None",
+        "output": output if output else "None",
+        "error": error if error else "None",
 #       "extra": extra,
         "runtime": "llmsensor",
         "tokens": token_usage,
-        "metadata": metadata,
+        "metadata": metadata if metadata else "None",
     }
 
     plugin_data = dict()
     try:
         plugin_data["name"] = "com.instana.plugin.openai"
         plugin_data["entityId"] = "Openai"
-        plugin_data["event"] = event_name
-        plugin_data["type"] = event_type
+        plugin_data["event"] = event_name if event_name else "None",
+        plugin_data["type"] = event_type if event_type else "None",
         plugin_data["app"] = AGENT_KEY
-        plugin_data["name"] = name
-        plugin_data["userId"] = user_id
-        plugin_data["userProps"] = user_props
+        plugin_data["name"] = name if name else "None",
+        plugin_data["userId"] = user_id if user_id else "None",
+        plugin_data["userProps"] = user_props if user_props else "None",
         plugin_data["tags"] = "None"
         plugin_data["runId"] = str(run_id)
         plugin_data["timestamp"] = datetime.now(timezone.utc).isoformat()
@@ -85,7 +85,6 @@ def track_event(
         plugin_data["output"] = output["text"] if output else "None"
         plugin_data["error"] = "None"
         plugin_data["runtime"] = "openai"
-        plugin_data["tokens"] = token_usage["completion"] if token_usage else 0
         plugin_data["metadata"] = "None"
         plugin_data["metrics"] = DictionaryOfStan()
         plugin_data["metrics"]["tokens"] = token_usage["completion"] if token_usage else 0
