@@ -72,22 +72,24 @@ def track_event(
     try:
         plugin_data["name"] = "com.instana.plugin.openai"
         plugin_data["entityId"] = "Openai"
-        plugin_data["data"] = DictionaryOfStan()
-        plugin_data["data"]["event"] = event_name
-        plugin_data["data"]["type"] = event_type
-        plugin_data["data"]["app"] = AGENT_KEY
-        plugin_data["data"]["name"] = name
-        plugin_data["data"]["userId"] = user_id
-        plugin_data["data"]["userProps"] = user_props
-        plugin_data["data"]["tags"] = "None"
-        plugin_data["data"]["runId"] = str(run_id)
-        plugin_data["data"]["timestamp"] = datetime.now(timezone.utc).isoformat()
-        plugin_data["data"]["input"] = input[0]["text"] if input and input != "None" else "None"
-        plugin_data["data"]["output"] = output["text"] if output else "None"
-        plugin_data["data"]["error"] = "None"
-        plugin_data["data"]["runtime"] = "openai"
-        plugin_data["data"]["tokens"] = token_usage["completion"] if token_usage else 0
-        plugin_data["data"]["metadata"] = "None"
+        plugin_data["event"] = event_name
+        plugin_data["type"] = event_type
+        plugin_data["app"] = AGENT_KEY
+        plugin_data["name"] = name
+        plugin_data["userId"] = user_id
+        plugin_data["userProps"] = user_props
+        plugin_data["tags"] = "None"
+        plugin_data["runId"] = str(run_id)
+        plugin_data["timestamp"] = datetime.now(timezone.utc).isoformat()
+        plugin_data["input"] = input[0]["text"] if input and input != "None" else "None"
+        plugin_data["output"] = output["text"] if output else "None"
+        plugin_data["error"] = "None"
+        plugin_data["runtime"] = "openai"
+        plugin_data["tokens"] = token_usage["completion"] if token_usage else 0
+        plugin_data["metadata"] = "None"
+        plugin_data["metrics"] = DictionaryOfStan()
+        plugin_data["metrics"]["tokens"] = token_usage["completion"] if token_usage else 0
+
     except Exception as e:
         print("_collect_metrics:", e)
 
