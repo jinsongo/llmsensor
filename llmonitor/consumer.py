@@ -52,28 +52,25 @@ class Consumer(Thread):
         batch = self.event_queue.get_batch()
         
         if len(batch) > 0:
-
-            if (self.verbose):
-                 print("llmsensor: sending events", len(batch))
+            print("llmsensor: sending events", len(batch))
 
             try:
                 if (self.verbose):
                     print("llmsensor: sending events to ", self.api_url)
                
-                data = to_json(batch)
-
                 # Report metrics
                 instana_data_url = "http://127.0.0.1:42699/com.instana.plugin.openai.123456"
-                response = requests.post(instana_data_url,
-                    data,
-                    headers={"Content-Type": "application/json"},
-                    timeout=0.8)
+                for item in batch:
+                    data=to_json(item)
+                    response = requests.post(instana_data_url,
+                        data,
+                        headers={"Content-Type": "application/json"},
+                        timeout=0.8)
+                    print("llmsensor: events data: ", data)
+                    print("llmsensor: events sent, status: ", response.status_code)
+                    if response.status_code != 200:
+                        print("Error sending events")
 
-                print("llmsensor: events data: ", data)
-                print("llmsensor: events sent, status: ", response.status_code)
-
-                if response.status_code != 200:
-                    print("Error sending events")
             except Exception as e:
 
                 print("Error sending events", e)
