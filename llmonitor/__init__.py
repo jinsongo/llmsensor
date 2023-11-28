@@ -72,12 +72,12 @@ def track_event(
     try:
         plugin_data["name"] = "com.instana.plugin.openai"
         plugin_data["entityId"] = "Openai"
-        plugin_data["event"] = event_name if event_name else "None",
-        plugin_data["type"] = event_type if event_type else "None",
+        plugin_data["event"] = event_name,
+        plugin_data["type"] = event_type,
         plugin_data["app"] = AGENT_KEY
         plugin_data["name"] = name if name else "None",
         plugin_data["userId"] = user_id if user_id else "None",
-        plugin_data["userProps"] = user_props if user_props else "None",
+        plugin_data["userProps"] = "None",
         plugin_data["tags"] = "None"
         plugin_data["runId"] = str(run_id)
         plugin_data["timestamp"] = datetime.now(timezone.utc).isoformat()
