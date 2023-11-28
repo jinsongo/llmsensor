@@ -48,36 +48,16 @@ def track_event(
     AGENT_KEY = "llm-openai-key"
     VERBOSE = os.environ.get("LOG_VERBOSE")
 
-    event = {
-        "event": event_name if event_name else "None",
-        "type": event_type if event_type else "None",
-        "app": AGENT_KEY,
-        "name": name if name else "None",
-        "userId": user_id if user_id else "None",
-        "userProps": user_props if user_props else "None",
-        "tags": "None",
-        "runId": str(run_id),
-        "parentRunId": str(parent_run_id) if parent_run_id else "None",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "input": input if input else "None",
-        "output": output if output else "None",
-        "error": error if error else "None",
-#       "extra": extra,
-        "runtime": "llmsensor",
-        "tokens": token_usage,
-        "metadata": metadata if metadata else "None",
-    }
-
     plugin_data = dict()
     try:
         plugin_data["name"] = "com.instana.plugin.openai"
         plugin_data["entityId"] = "Openai"
-        plugin_data["event"] = event_name,
-        plugin_data["type"] = event_type,
+        plugin_data["event"] = event_name if event_name else "None"
+        plugin_data["type"] = event_type if event_type else "None"
         plugin_data["app"] = AGENT_KEY
-        plugin_data["name"] = name if name else "None",
-        plugin_data["userId"] = user_id if user_id else "None",
-        plugin_data["userProps"] = "None",
+        plugin_data["name"] = name if name else "None"
+        plugin_data["userId"] = user_id if user_id else "None"
+        plugin_data["userProps"] = "None"
         plugin_data["tags"] = "None"
         plugin_data["runId"] = str(run_id)
         plugin_data["timestamp"] = datetime.now(timezone.utc).isoformat()
